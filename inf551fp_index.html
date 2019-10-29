@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Public Health Information Disclosure</title>
+
+    <meta name="description" content="Source code generated using layoutit.com">
+    <meta name="author" content="LayoutIt!">
+
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+
+  </head>
+  <body>
+
+    <div class="container-fluid">
+	<div class="row">
+		<div class="col-md-12"> 
+				<a class="navbar-brand" href="#">Restaurants & Stores health inspectation</a>
+				<form class="form-inline">
+					<input id="textKeyword" class="form-control mr-sm-2" type="text"> 
+					<button class="btn btn-primary my-2 my-sm-0" type="submit" onclick="mySearch()">
+						Search
+					</button>
+				</form>
+				
+			<div id="table_div">
+				<!-- <table class="table"> -->
+					
+			</div>
+		</div>
+	</div>
+</div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+	<!-- The core Firebase JS SDK is always required and must be listed first -->
+<script src="https://www.gstatic.com/firebasejs/7.2.2/firebase-app.js"></script>
+
+<!-- TODO: Add SDKs for Firebase products that you want to use
+     https://firebase.google.com/docs/web/setup#available-libraries -->
+<script src="https://www.gstatic.com/firebasejs/7.2.2/firebase-analytics.js"></script>
+<script src="https://www.gstatic.com/firebasejs/6.2.0/firebase-database.js"></script>
+
+<!-- Google Chart API to visualization -->
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<script>
+    // Bascic Library Loading
+	google.charts.load('current', {'packages':['table']});
+	var table;
+	var option;
+
+	function initTable() {
+		table = new google.visualization.Table(document.getElementById('table_div'));
+		option = {'title': 'LA public health',
+			'page': 'enable',
+			'pageSize': 100,
+			'showRowNumber': true,
+			'width': '100%',
+			'height': '90%'
+		};
+	}
+
+	function drawTable(types, rows) {
+		rows.unshift(types);
+		var data = google.visualization.arrayToDataTable(rows, false);
+		table.draw(data, option);
+	}
+	
+    // Your web app's Firebase configuration
+    var firebaseConfig = {
+        apiKey: "AIzaSyAZHNwyQ0J7uZjY-ck68pLFnbcMJo702E4",
+        authDomain: "inf551-project-7371b.firebaseapp.com",
+        databaseURL: "https://inf551-project-7371b.firebaseio.com",
+        projectId: "inf551-project-7371b",
+        storageBucket: "inf551-project-7371b.appspot.com",
+        messagingSenderId: "703442907461",
+        appId: "1:703442907461:web:e5cd8e3c261427d55ece2c",
+        measurementId: "G-5LSGPBRJE3"
+    };
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    firebase.analytics();
+
+    // Load Data Points asynchronously
+    var ref = firebase.database().ref();
+    var root_data;
+    var health_data;
+    var data_type;
+    var ordered_type;
+
+    ref.once('value', function(snapshot) {
+        snapshot.forEach(function(childSnapshot) {
+            root_data = childSnapshot.val();
+        });
+
+        // Processing data
+        health_data = root_data.data;
+        data_type = root_data.schema.fields;
+        ordered_type = data_type.map(x => x.name);
+        final_data = health_data.map(function(row) {
+            return ordered_type.map(function(key) {
+                return row[key];
+            });
+        });
+        // Visualization data by Google chart
+        //google.charts.setOnLoadCallback(drawTable(ordered_type, health_data.slice(1,100)));
+        google.charts.setOnLoadCallback(function () {
+			initTable();
+			drawTable(ordered_type, final_data);
+		});
+    });
+
+function mySearch() {
+	var keyword = document.getElementById("textKeyword").value;
+	final_data = health_data.map(function(row) {
+		return ordered_type.map(function(key) {
+			return row[key];
+		});
+	});
+	final_data = final_data.filter(function (row) {
+		return row[2].toLowerCase().indexOf(keyword.toLowerCase()) != -1;
+	});
+	// Visualization data by Google chart
+	drawTable(ordered_type, final_data);
+}
+</script>
+
+</body>
+</html>
